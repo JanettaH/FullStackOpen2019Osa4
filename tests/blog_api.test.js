@@ -100,6 +100,23 @@ test('blog without title and url', async () => {
   expect(response.body.length).toBe(initialBlogs.length);
 });
 
+test('delete succeeds with status code 204 if id is valid', async () => {
+  const response = await api.get('/api/blogs');
+  const blogsAtStart = response.body;
+  const blogToDelete = blogsAtStart[0];
+
+  await api.delete(`/api/blogs/${blogToDelete.id}`).expect(204);
+
+  const res = await api.get('/api/blogs');
+  const blogsAtEnd = res.body;
+
+  expect(blogsAtEnd.length).toBe(initialBlogs.length - 1);
+
+  const contents = blogsAtEnd.map(r => r.title);
+
+  expect(contents).not.toContain(blogToDelete.title);
+});
+
 afterAll(() => {
   mongoose.connection.close();
 });

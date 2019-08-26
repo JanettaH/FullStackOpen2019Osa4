@@ -7,7 +7,7 @@ const config = require('./utils/config');
 const blogsRouter = require('./controllers/blogs');
 
 const mongoUrl = config.MONGODB_URI;
-mongoose.connect(mongoUrl, { useNewUrlParser: true });
+mongoose.connect(mongoUrl, { useNewUrlParser: true, useFindAndModify: false });
 
 app.use(cors());
 app.use(bodyParser.json());
