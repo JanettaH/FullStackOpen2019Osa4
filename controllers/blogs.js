@@ -15,6 +15,21 @@ blogsRouter.get('/', (request, response, next) => {
 
 blogsRouter.delete('/:id', async (request, response, next) => {
   try {
+    const decodedToken = jwt.verify(request.token, process.env.SECRET);
+    if (!request.token || !decodedToken.id) {
+      return response.status(401).json({ error: 'token missing or invalid' });
+    }
+
+    const blog = await Blog.findById(request.params.id);
+
+    if (blog == null) {
+      return response.status(401).json({ error: 'Can`t find blog' });
+    }
+
+    if (decodedToken.id !== blog.user.toString()) {
+      return response.status(401).json({ error: 'No permissions' });
+    }
+
     await Blog.findByIdAndRemove(request.params.id);
     response.status(204).end();
   } catch (exception) {
@@ -44,7 +59,6 @@ blogsRouter.put('/:id', async (request, response, next) => {
 blogsRouter.post('/', async (request, response, next) => {
   const blog = new Blog(request.body);
 
-  const token = tokenService.getTokenFrom(request);
   if (blog.likes == undefined) {
     blog.likes = 0;
   }
@@ -55,8 +69,8 @@ blogsRouter.post('/', async (request, response, next) => {
 
   try {
     // eslint-disable-next-line no-undef
-    const decodedToken = jwt.verify(token, process.env.SECRET);
-    if (!token || !decodedToken.id) {
+    const decodedToken = jwt.verify(request.token, process.env.SECRET);
+    if (!request.token || !decodedToken.id) {
       return response.status(401).json({ error: 'token missing or invalid' });
     }
     const user = await User.findById(decodedToken.id);
