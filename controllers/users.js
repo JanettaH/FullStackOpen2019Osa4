@@ -3,7 +3,7 @@ const usersRouter = require('express').Router();
 const User = require('../models/user');
 const validationService = require('../utils/validationService');
 
-usersRouter.get('/', (request, response, next) => {
+usersRouter.get('/', async (request, response, next) => {
   User.find({})
     .populate('blogs')
     .then(users => {
